@@ -16,12 +16,14 @@ asor@test1:~$ sudo apt-get install angie
 
 ![screenshot 1](https://github.com/user-attachments/assets/db4d0ad7-2ad0-4082-bcb2-cbc070871bd8)
 
-Проверим работу динамического модуля [Image Filter](https://angie.software/angie/docs/configuration/modules/http/http_image_filter/). Установим модуль. Модуль зависит от библиотеки `libgd`, которая будет установлена автоматически.
+Проверим работу динамического модуля [Image Filter](https://angie.software/angie/docs/configuration/modules/http/http_image_filter/). Установим модуль.
 
 ```sh
 asor@test1:~$ sudo apt install angie-module-image-filter
 ```
 
+Модуль зависит от библиотеки `libgd`, которая будет установлена автоматически.
+ 
 Скачаем рандомную картинку и положим её туда же, где лежат статические страницы.
 
 ```sh
