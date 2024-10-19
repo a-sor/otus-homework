@@ -27,7 +27,7 @@ asor@test1:~$ sudo apt install angie-module-image-filter
 Скачаем рандомную картинку и положим её туда же, где лежат статические страницы.
 
 ```sh
-asor@test1:~$ asor@test1:~$ cd /usr/share/angie/html
+asor@test1:~$ cd /usr/share/angie/html
 asor@test1:/usr/share/angie/html$ sudo mkdir img && cd img
 asor@test1:/usr/share/angie/html/img$ sudo wget https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png
 ```
