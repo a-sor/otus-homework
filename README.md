@@ -16,7 +16,7 @@ asor@test1:~$ sudo apt-get install angie
 
 ![screenshot 1](https://github.com/user-attachments/assets/db4d0ad7-2ad0-4082-bcb2-cbc070871bd8)
 
-Проверим работу модуля [Image Filter](https://angie.software/angie/docs/configuration/modules/http/http_image_filter/). Установим модуль.
+Проверим работу динамического модуля [Image Filter](https://angie.software/angie/docs/configuration/modules/http/http_image_filter/). Установим модуль. Модуль зависит от библиотеки `libgd`, которая будет установлена автоматически.
 
 ```sh
 asor@test1:~$ sudo apt install angie-module-image-filter
@@ -61,3 +61,16 @@ asor@test1:~$ sudo systemctl reload angie.service
 Проверим работу модуля с помощью браузера.
 
 ![screenshot 2](https://github.com/user-attachments/assets/b87c927e-d6ed-4277-84e8-daceda3c8681)
+
+Теперь запустим Angie из Docker-образа, согласно [инструкции](https://angie.software/angie/docs/installation/docker/). Выполняем на локальной машине. Файлы страниц и конфигурации находятся в текущей директории, контейнеру откроем к ним доступ на чтение. Порт 80 контейнера пробросим на порт 8080 хоста.
+
+```sh
+asor@desktop1:~/angie$ docker run --rm --name angie -v $(pwd):/usr/share/angie/html:ro \
+    -v $(pwd)/angie.conf:/etc/angie/angie.conf:ro -p 8080:80 -d docker.angie.software/angie:1.7.0-alpine
+```
+
+Проверим работу Angie с помощью браузера с учётом того, что порт 80 контейнера переключен на порт 8080 хоста.
+
+![screenshot 3](https://github.com/user-attachments/assets/0b6ea403-850b-4700-aac1-61e4f53f2c20)
+
+Успешно произведена установка актуальной версии Angie различными способами.
