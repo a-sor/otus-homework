@@ -326,3 +326,16 @@ mysql> CREATE USER 'wordpress'@'%' IDENTIFIED WITH mysql_native_password BY '123
 mysql> GRANT ALL ON WORDPRESS.* TO 'wordpress'@'%';
 ```
 
+Скачиваем и устанавливаем Wordpress:
+
+```sh
+asor@test1:~$ cd /tmp
+asor@test1:/tmp$ curl -LO https://wordpress.org/latest.tar.gz
+asor@test1:/tmp$ tar -xzf latest.tar.gz
+asor@test1:/tmp$ cp wordpress/{wp-config-sample.php,wp-config.php}
+asor@test1:/tmp$ sudo mkdir /var/www
+asor@test1:/tmp$ sudo cp -a wordpress/. /var/www/wordpress
+asor@test1:/tmp$ sudo chown -R www-data:www-data /var/www/wordpress
+asor@test1:/tmp$ cd /var/www/wordpress/
+asor@test1:/var/www/wordpress$
+```
