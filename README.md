@@ -324,7 +324,7 @@ asor@test1:~$ sudo mysql
 mysql> CREATE DATABASE wordpress DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '1234';
 mysql> CREATE USER 'wordpress'@'%' IDENTIFIED WITH mysql_native_password BY '1234';
-mysql> GRANT ALL ON WORDPRESS.* TO 'wordpress'@'%';
+mysql> GRANT ALL ON wordpress.* TO 'wordpress'@'%';
 ```
 
 Скачиваем и устанавливаем Wordpress:
@@ -381,3 +381,104 @@ define('SECURE_AUTH_SALT', '3$.c)a93cI3%8`gT-@Ed}tB+i#JcK.01SG+|pzCB(ZL7XOF7W+zj
 define('LOGGED_IN_SALT',   's$k7:3,p`XmE.`vhzi4(,elviRDis D(_{XHu @yL8?p}QmJFcy,B}J:$V-b{{=%');
 define('NONCE_SALT',       '-r0a+^qn9Ay4c(kieQH8&[f8}!g68|a2Nvo,9Ol;OUSSNlO:4-@jn)ZRj#-gWnsB');
 ```
+
+Создаём конфигурацию Angie. Файл `/etc/angie/angie.conf`:
+
+```nginx
+user  www-data;
+
+worker_processes  auto;
+
+events {
+}
+
+http {
+    include       /etc/angie/mime.types;
+    default_type  application/octet-stream;
+
+    sendfile           on;
+    keepalive_timeout  65;
+
+    include /etc/angie/http.d/*.conf;
+}
+```
+
+Файл `/etc/angie/http.d/wordpress.conf`:
+
+```nginx
+server {
+    # Пока не настроен TLS, редиректим на порт 8000
+    # Сайт будет работать пока на этом порту.
+    listen 80 default_server;
+    return 302 http://$host:8000$request_uri;
+}
+
+server {
+    listen  8000;
+
+    charset utf-8;
+
+    root /var/www/wordpress;
+    index index.html index.php;
+
+    # Запрещаем доступ к некоторым важным директориям.
+
+    location ~ /\. {
+        deny all;
+    }
+
+    location ~ ^/wp-content/cache {
+        deny all;
+    }
+
+    location ~* /(?:uploads|files)/.*\.php$ {
+        deny all;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.php?$args;
+    }
+
+    # Кешируем статический контент.
+
+    location /wp-content {
+        add_header Cache-Control "max-age=31536000, public, no-transform, immutable";
+    }
+
+    location ~* \.(css|gif|ico|jpeg|jpg|js|png)$ {
+        add_header Cache-Control "max-age=31536000, public, no-transform, immutable";
+
+        log_not_found off;
+    }
+
+    # Не логгируем ошибки доступа к некоторым малозначительным ресурсам.
+
+    location = /favicon.ico {
+        log_not_found off;
+        access_log off;
+    }
+
+    location = /robots.txt {
+        log_not_found off;
+        access_log off;
+        allow all;
+    }
+
+    location ~ \.php$ {
+        # Проксируем запросы к PHP-скриптам.
+
+        include fastcgi.conf;
+        fastcgi_intercept_errors on;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_index index.php;
+    }
+}
+```
+
+Перезапускаем Angie.
+```sh
+asor@test1:~$ sudo systemctl reload angie.service
+```
+
+Проверяем доступность сайта:
+
