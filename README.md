@@ -317,7 +317,7 @@ asor@test1:~$ sudo apt install mysql-server-8.0
 asor@test1:~$ sudo apt install php-fpm php-curl php-mysqli php-gd php-intl php-mbstring php-soap php-xml php-xmlrpc php-zip
 ```
 
-Создаём БД и настраиваем MySQL. Данный способ настройки сейчас считается [устаревшим](https://mariadb.com/kb/en/authentication-plugin-mysql_native_password/), но для наших целей он применим.
+Создаём БД и настраиваем MySQL. Аутентификация с использованием плагина `mysql_native_password` [не рекоммендуется](https://mariadb.com/kb/en/authentication-plugin-mysql_native_password/) для систем с высоким уровнем безопасности, но применима для наших целей.
 
 ```sh
 asor@test1:~$ sudo mysql
