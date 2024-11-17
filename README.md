@@ -310,9 +310,19 @@ root@test1:~# systemctl reload angie
 
 Angie изнчально установлен на виртуальной машине с IP [84.252.137.218](http://84.252.137.218). Поскольку у нас нет доменного имени, мы будем обращаться к сайту по IP.
 
-Для работы Wordpress устанавливаем сервер MySQL и PHP:
+Для работы Wordpress устанавливаем сервер MySQL и PHP с необходимыми расширениями:
 
 ```sh
 asor@test1:~$ sudo apt install mysql-server-8.0
 asor@test1:~$ sudo apt install php-fpm php-curl php-mysqli php-gd php-intl php-mbstring php-soap php-xml php-xmlrpc php-zip
 ```
+
+Настраиваем MySQL. Данный тип настройки сейчас считается [устаревшим](https://mariadb.com/kb/en/authentication-plugin-mysql_native_password/), но для наших целей он применим.
+
+```sh
+asor@test1:~$ sudo mysql
+mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '1234';
+mysql> CREATE USER 'wordpress'@'%' IDENTIFIED WITH mysql_native_password BY '1234';
+mysql> GRANT ALL ON WORDPRESS.* TO 'wordpress'@'%';
+```
+
