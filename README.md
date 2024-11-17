@@ -480,5 +480,10 @@ server {
 asor@test1:~$ sudo systemctl reload angie.service
 ```
 
-Проверяем доступность сайта:
+Проверяем доступность сайта. Wordpress готов к установке:
 
+![wp-install](https://github.com/user-attachments/assets/a25c5cc7-6c48-4513-9d14-7bb12bceb4ca)
+
+Wordpress успешно установлен:
+
+![wp-admin](https://github.com/user-attachments/assets/6d3d138e-03d6-498e-a130-5b62260ce916)
