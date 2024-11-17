@@ -317,10 +317,11 @@ asor@test1:~$ sudo apt install mysql-server-8.0
 asor@test1:~$ sudo apt install php-fpm php-curl php-mysqli php-gd php-intl php-mbstring php-soap php-xml php-xmlrpc php-zip
 ```
 
-Настраиваем MySQL. Данный тип настройки сейчас считается [устаревшим](https://mariadb.com/kb/en/authentication-plugin-mysql_native_password/), но для наших целей он применим.
+Создаём БД и настраиваем MySQL. Данный тип настройки сейчас считается [устаревшим](https://mariadb.com/kb/en/authentication-plugin-mysql_native_password/), но для наших целей он применим.
 
 ```sh
 asor@test1:~$ sudo mysql
+mysql> CREATE DATABASE wordpress DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '1234';
 mysql> CREATE USER 'wordpress'@'%' IDENTIFIED WITH mysql_native_password BY '1234';
 mysql> GRANT ALL ON WORDPRESS.* TO 'wordpress'@'%';
@@ -336,6 +337,47 @@ asor@test1:/tmp$ cp wordpress/{wp-config-sample.php,wp-config.php}
 asor@test1:/tmp$ sudo mkdir /var/www
 asor@test1:/tmp$ sudo cp -a wordpress/. /var/www/wordpress
 asor@test1:/tmp$ sudo chown -R www-data:www-data /var/www/wordpress
-asor@test1:/tmp$ cd /var/www/wordpress/
-asor@test1:/var/www/wordpress$
+```
+
+Редактируем файл `/var/www/wordpress/wp-config.php` в соответствии с настройками БД:
+
+```php
+// ** Database settings - You can get this info from your web host ** //
+/** The name of the database for WordPress */
+define( 'DB_NAME', 'wordpress' );
+
+/** Database username */
+define( 'DB_USER', 'wordpress' );
+
+/** Database password */
+define( 'DB_PASSWORD', '1234' );
+
+/** Database hostname */
+define( 'DB_HOST', 'localhost' );
+
+/** Database charset to use in creating database tables. */
+define( 'DB_CHARSET', 'utf8' );
+
+/** The database collate type. Don't change this if in doubt. */
+define( 'DB_COLLATE', '' );
+
+/**#@+
+ * Authentication unique keys and salts.
+ *
+ * Change these to different unique phrases! You can generate these using
+ * the {@link https://api.wordpress.org/secret-key/1.1/salt/ WordPress.org secret-key service}.
+ *
+ * You can change these at any point in time to invalidate all existing cookies.
+ * This will force all users to have to log in again.
+ *
+ * @since 2.6.0
+ */
+define('AUTH_KEY',         '<P`yGe{e-%+h;qLnt-nhT|5&/BCOn#O|b?>V#IgQn7CyK~`MmsYgczJm;cf@gsJQ');
+define('SECURE_AUTH_KEY',  'Fj Qnr`c]/_4w+>^sIK!h3+x`;L{>Vv(Ui$9Tf-sw->)cb)zWJ]u:uIy/hS?}jd1');
+define('LOGGED_IN_KEY',    'H]-iJKa/~L/3o=4>5BO+!nhYu]+(/3Hu+/ {G|l`HH[Mppl3D)!+zPG#(z|k[2H+');
+define('NONCE_KEY',        '^tInSs&ki&W8D3srIg8I8MAM6DC88&|$Z3bEl|jtKoWaKlchO*w_!`0`[1DVWhtm');
+define('AUTH_SALT',        '?aE,OCQV+ClbrodpB&bihbF}*-[meV7sr3s7JdtLe}|P5hWm30aA5^V=Ct`Xj&-/');
+define('SECURE_AUTH_SALT', '3$.c)a93cI3%8`gT-@Ed}tB+i#JcK.01SG+|pzCB(ZL7XOF7W+zj;vnRE$Luay*k');
+define('LOGGED_IN_SALT',   's$k7:3,p`XmE.`vhzi4(,elviRDis D(_{XHu @yL8?p}QmJFcy,B}J:$V-b{{=%');
+define('NONCE_SALT',       '-r0a+^qn9Ay4c(kieQH8&[f8}!g68|a2Nvo,9Ol;OUSSNlO:4-@jn)ZRj#-gWnsB');
 ```
