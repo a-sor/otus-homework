@@ -498,9 +498,69 @@ Angie изнчально установлен на виртуальной маш
 
 С помощью сервиса [WebPageTest](https://www.webpagetest.org/) было выполнено предварительное тестирования сайта. Получены следующие обобщённые результаты:
 
-![wordpress-performance1-1](https://github.com/user-attachments/assets/3ad47389-35eb-466f-8d5c-cfa6e68d7fb6)
+![Performance test 1](https://github.com/user-attachments/assets/3ad47389-35eb-466f-8d5c-cfa6e68d7fb6)
 
-Результаты тестирования после оптимизации:
+При создании конфигурации Angie для сайта уже были предусмотрены некоторые меры по оптимизации. В частности, клиентское кеширование статического контента:
 
-![wordpress-performance2-1](https://github.com/user-attachments/assets/179a3506-07b0-4a61-ad9f-e884943b0a11)
+```nginx
+    location /wp-content {
+        add_header Cache-Control "max-age=31536000, public, no-transform, immutable";
+    }
 
+    location ~* \.(css|gif|ico|jpeg|jpg|js|png)$ {
+        add_header Cache-Control "max-age=31536000, public, no-transform, immutable";
+
+        log_not_found off;
+    }
+```
+
+Теперь мы добавим компрессию текстовых ресурсов:
+
+```nginx
+gzip on;
+gzip_types text/plain text/css text/xml application/javascript application/json image/svg+xml font/woff2;
+gzip_comp_level 6;
+gzip_proxied any;
+gzip_min_length 1000;
+gzip_vary on;
+```
+
+Добавим также серверное кеширование. Поскольку мы кешируем контент не от прокси-сервера, а передаваемый "движком" PHP по протоколу FastCGI, вместо директив `proxy_cache_...` используем соответствующие дирекстивы `fastcgi_cache_...`:
+
+```nginx
+fastcgi_cache_valid 1m;
+fastcgi_cache_key $scheme$host$request_uri;
+fastcgi_cache_path /wp_cache levels=1:2 keys_zone=wp_cache:10m inactive=48h max_size=800m;
+
+# ...
+
+server {
+  # ...
+    location ~ \.php$ {
+         
+        # ...
+        
+        fastcgi_cache wp_cache;
+        fastcgi_cache_valid 200 1h;
+        fastcgi_cache_lock on;
+        fastcgi_cache_min_uses 2;
+        fastcgi_ignore_headers "Cache-Control" "Expires";
+        fastcgi_cache_use_stale updating error timeout invalid_header http_500 http_503;
+        fastcgi_cache_background_update on;
+# ...
+```
+
+Перезапускаем Angie.
+```sh
+asor@test1:~$ sudo systemctl reload angie.service
+```
+
+Повторяем тестирование с помощью WebPageTest. Результаты тестирования после оптимизации:
+
+![Performance test 2](https://github.com/user-attachments/assets/179a3506-07b0-4a61-ad9f-e884943b0a11)
+
+![Скриншот сайта](https://github.com/user-attachments/assets/b464c21b-478d-464a-a9b8-8c323a831200)
+
+Поскольку в данный момент на сайте очень мало контента, оптимизация показала лишь незначительные улучшение показателей. В частности, на несколько миллисекунд улучшилась скорость загрузки контента и время до первого байта, тогда как другие показатели остались без изменения, а показатель CPU Time даже ухудшился на 1 мс.
+
+Оптимизация сайта произведена, однако более хороших показателей можно добиться при большем количестве контента.
