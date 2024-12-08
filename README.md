@@ -699,3 +699,8 @@ http {
     }
 }
 ```
+Перезапустим Angie и проверим общую работоспособность сайта. Сайт успешно работает по HTTP/2:
+
+![http2](https://github.com/user-attachments/assets/4379261a-1f56-4d4c-abf6-ee9108892c47)
+
+
