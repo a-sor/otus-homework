@@ -652,13 +652,13 @@ http {
 
         # Кешируем SSL-сессии
 
-        ssl_session_cache shared:ssl_cache:4m;
-        ssl_session_timeout 28h;
+        ssl_session_cache    shared:ssl_cache:4m;
+        ssl_session_timeout  28h;
 
         # На стороне клиента:
 
-        ssl_session_tickets on;
-        ssl_early_data      on;
+        ssl_session_tickets  on;
+        ssl_early_data       on;
 
         acme                 sor0_rsa;
         acme                 sor0_ecdsa;
