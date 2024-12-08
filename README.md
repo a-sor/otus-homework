@@ -703,10 +703,12 @@ http {
 
 ![http2](https://github.com/user-attachments/assets/4379261a-1f56-4d4c-abf6-ee9108892c47)
 
-Сайт показывает удовлетворительные результаты тестирования с помощью WebPageTest:
-
+Сайт показывает удовлетворительные результаты тестирования с помощью WebPageTest.
+<details>
+  <summary>Показать</summary>
 ![wpt1](https://github.com/user-attachments/assets/680b5608-506b-4e5a-984e-bb7a75a39b78)
-
+</details>
+  
 Тестирование конфигурации SSL с помощью сервиса [SSL Labs](https://www.ssllabs.com/ssltest/) показало хороший результат:
 
 ![ssllabs1](https://github.com/user-attachments/assets/9f71f517-7fc8-41d5-9a6c-433bb3b1ef39)
