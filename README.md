@@ -6,6 +6,7 @@
   - [Работа над ошибками №1](#работа-над-ошибками-1)
 - [Домашнее задание №4](#домашнее-задание-4)
 - [Домашнее задание №5](#домашнее-задание-5)
+- [Домашнее задание №6](#домашнее-задание-6)
 
 ## Домашнее задание №1
 
@@ -566,3 +567,135 @@ asor@test1:~$ sudo systemctl reload angie.service
 Как и предполагалось, оптимизация лишь незначительныо улучшила показатели. В частности, на несколько миллисекунд улучшилась скорость загрузки контента и время до первого байта, тогда как другие показатели остались без изменения, а показатель CPU Time даже ухудшился на 1 мс.
 
 Оптимизация сайта произведена, однако лучших показателей можно добиться при большем количестве контента.
+
+## Домашнее задание №6
+
+### Настройка HTTPS
+#### Цель: Настроить эффективную и безопасную конфигурацию для HTTPS.
+
+У меня имеется в распоряжении доменное имя [sor0.ru](http://sor0.ru). Установим на нём сайт, использовавшися в [ДЗ №3](#домашнее-задание-3). Создадим следующую конфигурацию Angie:
+
+```nginx
+worker_processes auto;
+
+events {
+}
+
+http {
+
+    # Настроим получение сертификатов от Let's Encrypt. Для большей
+    # совместимости будем использовать сертификаты двух типов - RSA и ECDSA.
+    # Для этого настроим два ACME-клиента.
+
+    acme_client sor0_rsa https://acme-v02.api.letsencrypt.org/directory key_type=rsa key_bits=2048;
+
+    acme_client sor0_ecdsa https://acme-v02.api.letsencrypt.org/directory key_type=ecdsa key_bits=256;
+
+    # адрес резолвера в нашей системе
+
+    resolver 127.0.0.53 ipv6=off;
+
+    # необходимые общие настройки
+
+    root          html;
+    index         index.html;
+    error_page    404 /error/index.html;
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile      on;
+
+    # Оптимизация. Задаём режим кеширования статического контента
+    # с учётом браузера.
+
+    map $msie $cache_control {
+
+        # Ресурс актуален в течение 1 года, может быть закеширован в любом
+        # кеше, не должны применяться никакие преобразования, не требует
+        # обновлений.
+
+        default "max-age=31536000, public, no-transform, immutable";
+
+        # Для MS IE ответ предназначен для одного пользователя и не должен
+        # помещаться в разделяемый кеш.
+
+        "1"     "max-age=31536000, private, no-transform, immutable";
+    }
+
+    # Основной сервер
+
+    server {
+
+        listen               443 ssl reuseport;
+        server_name          sor0.ru www.sor0.ru;
+
+        # Используем HTTP/2
+
+        http2 on;
+
+        # Устанавливаем HTTPS по умолчанию.
+        # в порядке эксперимента установим небольшое значение max-age для HSTS
+        add_header Strict-Transport-Security "max-age=600" always;
+
+        # Оптимизация SSL
+
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305;
+
+        # Используем полученные от Let's Encrypt сертификаты
+        # и соответствующие им ключи.
+
+        ssl_certificate      $acme_cert_sor0_rsa;
+        ssl_certificate_key  $acme_cert_key_sor0_rsa;
+
+        ssl_certificate      $acme_cert_sor0_ecdsa;
+        ssl_certificate_key  $acme_cert_key_sor0_ecdsa;
+
+        # Кешируем SSL-сессии
+
+        ssl_session_cache shared:ssl_cache:4m;
+        ssl_session_timeout 28h;
+
+        # На стороне клиента:
+
+        ssl_session_tickets on;
+        ssl_early_data      on;
+
+        acme                 sor0_rsa;
+        acme                 sor0_ecdsa;
+
+        # Оптимизация. Кеширование картинок, css и скриптов
+
+        location ~* \.(ico|jpeg|jpg|png)$ {
+            add_header Cache-Control $cache_control;
+        }
+
+        location /assets {
+            add_header Cache-Control $cache_control;
+            try_files $uri =404;
+        }
+
+        location /error {
+            add_header Cache-Control $cache_control;
+            try_files $uri =404;
+        }
+
+        location /images {
+            add_header Cache-Control $cache_control;
+            try_files $uri =404;
+        }
+
+        location / {
+            try_files /index.html =404;
+        }
+    }
+
+    server {
+        # Редирект с HTTP на HTTPS.
+
+        listen               80 default_server;
+        server_name          sor0.ru www.sor0.ru;
+
+        return 302 https://sor0.ru$request_uri;
+    }
+}
+```
