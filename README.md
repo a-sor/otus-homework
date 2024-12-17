@@ -7,6 +7,7 @@
 - [Домашнее задание №4](#домашнее-задание-4)
 - [Домашнее задание №5](#домашнее-задание-5)
 - [Домашнее задание №6](#домашнее-задание-6)
+- [Домашнее задание №7](#домашнее-задание-7)
 
 ## Домашнее задание №1
 
@@ -723,3 +724,135 @@ http {
  </details>
 
 Сформирована корректная конфигурация HTTPS для сайта, получен сертификат, реализовано перенаправление и настроен заголовок HSTS.
+
+## Домашнее задание №7
+
+### Балансировка HTTP
+#### Цель: Настроить схему балансировки на уровне HTTP.
+
+Создадим сервер Angie и Console Light в docker-контейнере.
+
+<details>
+  <summary>Показать Dockerfile</summary>
+
+```Dockerfile
+FROM debian:12
+
+LABEL org.opencontainers.image.authors="Release Engineering Team <devops@tech.wbsrv.ru>"
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN set -x \
+     && apt-get update \
+     && apt-get install --no-install-recommends --no-install-suggests -y \
+          ca-certificates curl \
+     && curl -o /etc/apt/trusted.gpg.d/angie-signing.gpg \
+          https://angie.software/keys/angie-signing.gpg \
+     && echo "deb https://download.angie.software/angie/$(. /etc/os-release && echo "$ID/$VERSION_ID $VERSION_CODENAME") main" \
+          > /etc/apt/sources.list.d/angie.list \
+     && apt-get update \
+     && apt-get install --no-install-recommends --no-install-suggests -y \
+          angie angie-console-light angie-module-geoip2 angie-module-njs \
+     && rm -Rf /var/lib/apt/lists \
+          /etc/apt/sources.list.d/angie.list \
+          /etc/apt/trusted.gpg.d/angie-signing.gpg \
+     && ln -sf /dev/stdout /var/log/angie/access.log \
+     && ln -sf /dev/stderr /var/log/angie/error.log
+
+EXPOSE 80
+
+CMD ["angie", "-g", "daemon off;"]
+```
+</details>
+
+Создадим также четыре проксируемых сервера. Для простоты, в качестве проксируемых серверов будем использовать web-приложение `webdebugger`, которое спользовалось во время лекции. Проксируемые сервера будут различаться цветом фона выдаваемой странцы.
+
+Контейнеры Angie/Console Light и контейнеры web-приложений объединим в единую сеть с помощью docker-compose.
+
+<details>
+  <summary>Показать docker-compose.yml</summary>
+
+```yml
+version: '3'
+
+services:
+  angie:
+    image: my-angie
+    container_name: myangie
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./angie.conf:/etc/angie/angie.conf:ro
+      - ./http.d/default.conf:/etc/angie/http.d/default.conf:ro
+    networks:
+      anet:
+        ipv4_address: 10.10.0.10
+
+  debug-white:
+    image: vscoder/webdebugger
+    container_name: debug-white
+    restart: unless-stopped
+    environment:
+      APP_DELAY: 0
+      APP_PORT: 8080
+      APP_BGCOLOR: white
+    ports:
+      - "9000:8080"
+    networks:
+      anet:
+        ipv4_address: 10.10.0.11
+
+  debug-blue:
+    image: vscoder/webdebugger
+    container_name: debug-blue
+    restart: unless-stopped
+    environment:
+      APP_DELAY: 0
+      APP_PORT: 8080
+      APP_BGCOLOR: skyblue
+    ports:
+      - "9001:8080"
+    networks:
+      anet:
+        ipv4_address: 10.10.0.12
+
+  debug-green:
+    image: vscoder/webdebugger
+    container_name: debug-green
+    restart: unless-stopped
+    environment:
+      APP_DELAY: 0
+      APP_PORT: 8080
+      APP_BGCOLOR: limegreen
+    ports:
+      - "9002:8080"
+    networks:
+      anet:
+        ipv4_address: 10.10.0.13
+
+  debug-gold:
+    image: vscoder/webdebugger
+    container_name: debug-gold
+    restart: unless-stopped
+    environment:
+      APP_DELAY: 0
+      APP_PORT: 8080
+      APP_BGCOLOR: gold
+    ports:
+      - "9003:8080"
+    networks:
+      anet:
+        ipv4_address: 10.10.0.14
+
+networks:
+  anet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.0.0/16
+          gateway: 10.10.0.1
+```
+</details>
+
+В этой сети сервер Angie/Console Light будет иметь IP-адрес `10.10.0.10`, а сервера web-приложений - с `10.10.0.11` по `10.10.0.14` соответственно.
