@@ -765,9 +765,9 @@ CMD ["angie", "-g", "daemon off;"]
 ```
 </details>
 
-Создадим также четыре проксируемых сервера. Для простоты, в качестве проксируемых серверов будем использовать web-приложение `webdebugger`, которое спользовалось во время лекции. Проксируемые сервера будут различаться цветом фона выдаваемой странцы.
+Создадим также четыре проксируемых сервера. Для простоты, в качестве проксируемых серверов будем использовать web-приложение vscode/webdebugger, которое спользовалось во время лекции. Проксируемые сервера будут различаться цветом фона выдаваемой странцы.
 
-Контейнеры Angie/Console Light и контейнеры web-приложений объединим в единую сеть с помощью docker-compose.
+С помощью docker-compose создадим единую конфигурацию для контейнеров Angie/Console Light и контейнеров web-приложений. Сконфигурируем для них общую сеть. В этой сети сервер Angie/Console Light будет иметь IP-адрес 10.10.0.10, а сервера web-приложений соответственно - с 10.10.0.11 по 10.10.0.14.
 
 <details>
   <summary>Показать docker-compose.yml</summary>
@@ -855,4 +855,59 @@ networks:
 ```
 </details>
 
-В этой сети сервер Angie/Console Light будет иметь IP-адрес `10.10.0.10`, а сервера web-приложений - с `10.10.0.11` по `10.10.0.14` соответственно.
+В конфигурации Angie настроим работу Console Light. Также настроим HTTP-балансировку проксируемых серверов.
+
+
+<details>
+  <summary>Показать /etc/angie/http.d/default.conf</summary>
+
+```nginx
+
+# настройка балансировки
+upstream backend {
+    zone upstream_zone 256k;
+    server 10.10.0.11:8080; # white
+    server 10.10.0.12:8080; # blue
+    server 10.10.0.13:8080; # green
+    server 10.10.0.14:8080; # gold
+}
+
+server {
+    listen       80;
+    server_name  localhost;
+
+    status_zone server_zone;
+
+    location / {
+        #root   /usr/share/angie/html;
+        index  index.html index.htm;
+        proxy_pass http://backend;
+
+        status_zone location_zone;
+    }
+
+    location /console/ {
+        # настройка Console Light
+
+        allow 127.0.0.1;
+        auto_redirect on;
+
+        alias /usr/share/angie-console-light/html/;
+
+        index index.html;
+
+        location /console/api/ {
+            api /status/;
+        }
+
+    }
+
+    # redirect server error pages to the static page /50x.html
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/angie/html;
+    }
+}
+
+```
+</details>
