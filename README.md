@@ -911,3 +911,8 @@ server {
 
 ```
 </details>
+
+Запустим контейнеры. Проверим работоспособность Console Light:
+
+![console-lite](https://github.com/user-attachments/assets/d60c1c0d-f3de-4f65-875b-96edf5cec560)
+
