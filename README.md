@@ -957,3 +957,15 @@ upstream backend {
 }
 ```
 </details>
+
+Перезапустим контейнеры и убедимся, что наш сервер работает в соостветствии с алгоритмом IP Hash. Несколько раз обновим главную страницу, затем с помощью Console Light посмотрим распределение запросов.
+
+Все запросы пришли на один и тот же сервер.
+
+<details>
+  <summary>Показать</summary>
+  
+![ip_hash-запросы-по-бэкендам](https://github.com/user-attachments/assets/a219b70e-4a9f-40af-85bd-583f87faaac7)
+
+![ip_hash-общее-количество-запросов](https://github.com/user-attachments/assets/69753b5f-b00a-4e48-b344-e5bd3f4e47e8)
+</details>
