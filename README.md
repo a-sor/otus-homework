@@ -983,3 +983,29 @@ upstream backend {
 
 ![failed-backend](https://github.com/user-attachments/assets/064cdd9a-9d28-4862-851c-9494bf194384)
 </details>
+
+Протестируем конфигурацию с резервным бэкендом. Отметим один из бэкендов параметром `backup`. 
+
+<details>
+  <summary>Показать</summary>
+
+```nginx
+upstream backend {
+    zone upstream_zone 256k;
+    server 10.10.0.11:8080; # white
+    server 10.10.0.12:8080; # blue
+    server 10.10.0.13:8080; # green
+    server 10.10.0.14:8080 backup; # gold
+}
+```
+</details>
+
+Перезапустим контейнеры и несколько раз обновим главную страницу. С помощью Console Light посмотрим распределение запросов.
+
+Запросы перенаправляются на все сервера, кроме помеченного как `backup`.
+
+<details>
+  <summary>Показать</summary>
+
+![backup-1](https://github.com/user-attachments/assets/132349be-c3b5-4d94-a09a-645fae1eeec3)
+</details>
