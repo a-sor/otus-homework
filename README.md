@@ -1037,3 +1037,5 @@ upstream backend {
   
 ![backup-2](https://github.com/user-attachments/assets/8352f6b7-4e18-4589-9939-52256c644b5a)
 </details>
+
+Тест работоспособности проведён для всех вариантов конфигурации.
