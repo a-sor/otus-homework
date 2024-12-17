@@ -1009,3 +1009,19 @@ upstream backend {
 
 ![backup-1](https://github.com/user-attachments/assets/132349be-c3b5-4d94-a09a-645fae1eeec3)
 </details>
+
+Отключим все бэкенды, кроме помеченного как `backup`:
+
+```sh
+~$ docker stop debug-blue debug-white debug-green
+```
+
+Обновим главную страницу. Ощутилась небольшая задержка, после чего отобразилась страница с жёлтым фоном. С помощью Console Light посмотрим распределение запросов.
+
+Запрос перенаправился на сервер, помеченный как `backup`.
+
+<details>
+  <summary>Показать</summary>
+  
+![backup-2](https://github.com/user-attachments/assets/8352f6b7-4e18-4589-9939-52256c644b5a)
+</details>
