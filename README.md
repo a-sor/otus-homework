@@ -969,3 +969,17 @@ upstream backend {
 
 ![ip_hash-общее-количество-запросов](https://github.com/user-attachments/assets/69753b5f-b00a-4e48-b344-e5bd3f4e47e8)
 </details>
+
+Протестируем работоспособность системы при одном отключенном бэкенде. Отключим один из бэкендов:
+
+```sh
+~$ docker stop debug-gold
+```
+
+Несколько раз обновим главную страницу. При одном из обновлений ощутилась небольшая задержка, страница с жёлтым фоном больше не отображалась. Посмотрим, как отобразил это событие Console Light.
+
+<details>
+  <summary>Показать</summary>
+
+![failed-backend](https://github.com/user-attachments/assets/064cdd9a-9d28-4862-851c-9494bf194384)
+</details>
