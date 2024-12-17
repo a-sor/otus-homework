@@ -912,7 +912,18 @@ server {
 ```
 </details>
 
-Запустим контейнеры. Проверим работоспособность Console Light:
+Запустим контейнеры. Убедимся, что балансировка работает. Для этого перейдём на главную страницу сервера Angie и несколько раз обновим страницу. При каждом последующем обновлении страница будет отображаться с другим цветом фона.
+
+<details>
+  <summary>Показать</summary>
+
+![balance](https://github.com/user-attachments/assets/c8dad4ba-1781-432f-91dd-70b417cc6051)
+</details>
+
+Проверим работоспособность Console Light:
+
+<details>
+  <summary>Показать</summary>
 
 ![console-lite](https://github.com/user-attachments/assets/d60c1c0d-f3de-4f65-875b-96edf5cec560)
-
+</details>
